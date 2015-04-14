@@ -1,0 +1,94 @@
+#! /bin/sh
+# asf_learn (Bourne shell script) -- Advanced Spam Filtering's learning script
+# Learns from a given user's "learn-spam" & "learn-notspam" folders
+#
+# Usage: asf_learn [-d] <username>
+#
+# Note: this script must be run as the user given as <username>
+# The cron job that calls this script should redirect stdout to a WRITABLE log file
+#
+# Version: 1.1
+
+self=${0##*/}
+syslog_facility=mail
+syslog_tag="$self[$$]"
+
+
+dir_empty()
+{
+  if [ "$(ls -A $1)" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+
+# *** MAINLINE ***
+# check for -d (the debug switch)
+if [ x"$1" = x-d ] ; then
+  shift
+  log()
+  {
+    log_level=$1
+    shift
+    echo "$self($log_level): $*"
+  }
+else
+  log()
+  {
+    log_level=$1
+    shift
+    logger -t $syslog_tag -p $syslog_facility.$log_level "$*"
+  }
+fi
+
+
+if [ -n "$1" ] ; then
+  username=$1
+else
+  echo "$self: no username supplied" >&2
+  exit 1
+fi
+
+user_homedir=$(getent passwd $username | cut -d: -f6) 
+if [ ! -d $user_homedir ] ; then
+  echo "$self: invalid user '$username'" >&2
+  exit 2
+fi
+
+if [ ! -d $user_homedir/Maildir/.learn-spam/cur ] ; then
+  echo "$self: ~$username/Maildir/.learn-spam doesn't exist" >&2
+  exit 3
+fi
+
+if [ ! -d $user_homedir/Maildir/.learn-notspam/cur ] ; then
+  echo "$self: ~$username/Maildir/.learn-notspam doesn't exist" >&2
+  exit 3
+fi
+
+echo "$(date --rfc-3339=seconds)  $username"
+
+if ! dir_empty $user_homedir/Maildir/.learn-spam/cur
+then
+  touch $user_homedir/Maildir/.learn-spam/asf_learned
+  log debug "spam for $username... learning"
+  sa-learn --no-sync --spam $user_homedir/Maildir/.learn-spam/cur
+  sync=y
+fi
+if ! dir_empty $user_homedir/Maildir/.learn-notspam/cur
+then
+  log debug "ham for $username... learning"
+  sa-learn --no-sync --ham $user_homedir/Maildir/.learn-notspam/cur
+  sync=y
+  log debug "ham for $username... moving to inbox"
+  mv $user_homedir/Maildir/.learn-notspam/cur/* $user_homedir/Maildir/cur
+fi
+
+if [ "$sync" = y ] ; then
+  log debug "syncing for $username"
+  sa-learn --sync
+fi
+
+echo
+log info "done for $username"

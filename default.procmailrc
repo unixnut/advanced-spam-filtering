@@ -1,0 +1,7 @@
+MAILDIR=$HOME/Maildir
+DEFAULT=$HOME/Maildir/
+
+:0
+* X-Spam-Flag: YES
+.spam/
+

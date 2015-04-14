@@ -1,0 +1,38 @@
+#! /bin/sh
+# setup_asf (Bourne shell script) -- sets up advanced spam filtering for a given user
+
+self=${0##*/}
+
+if [ -n "$1" ] ; then
+  username=$1
+else
+  echo "$self: no username supplied" >&2
+  exit 1
+fi
+
+user_homedir=$(getent passwd $username | cut -d: -f6) 
+if [ ! -d $user_homedir ] ; then
+  echo "$self: invalid user" >&2
+  exit 2
+fi
+
+if [ ! -d $user_homedir/Maildir ] ; then
+  echo "$self: ~$username/Maildir doesn't exist" >&2
+  exit 2
+fi
+
+if grep -q '^[^#]*procmail' $user_homedir/.forward 2>/dev/null
+then
+  echo "$self: ~$username/.forward already invokes procmail" >&2
+  exit 3
+fi
+
+maildirmake.dovecot $user_homedir/Maildir/.spam $username
+maildirmake.dovecot $user_homedir/Maildir/.learn-spam $username
+maildirmake.dovecot $user_homedir/Maildir/.learn-notspam $username
+
+# this is used as a time boundary so asf_cleanup doesn't move spam that hasn't been learned yet
+touch $user_homedir/Maildir/.learn-spam/asf_learned
+
+# TO-DO: check for "mailbox_command = procmail ..." in /etc/postfix/main.cf
+echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward

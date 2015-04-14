@@ -1,0 +1,70 @@
+#! /bin/sh
+# asf_cleanup (Bourne shell script) -- Advanced Spam Filtering's post-learning cleanup script
+# Moves a given user's learned spam to their "spam" folder
+#
+# Usage: asf_cleanup [-d] <username>
+#
+# Note: this script must be run as the user given as <username>
+# The cron job that calls this script should redirect stdout to a WRITABLE log file
+#
+# Version: 1.1
+# Requires: GNU mv, GNU xargs
+
+self=${0##*/}
+syslog_facility=mail
+syslog_tag="$self[$$]"
+
+
+# *** MAINLINE ***
+# check for -d (the debug switch)
+if [ x"$1" = x-d ] ; then
+  shift
+  log()
+  {
+    log_level=$1
+    shift
+    echo "$self($log_level): $*"
+  }
+else
+  log()
+  {
+    log_level=$1
+    shift
+    logger -t $syslog_tag -p $syslog_facility.$log_level "$*"
+  }
+fi
+
+
+if [ -n "$1" ] ; then
+  username=$1
+else
+  echo "$self: no username supplied" >&2
+  exit 1
+fi
+
+user_homedir=$(getent passwd $username | cut -d: -f6) 
+if [ ! -d $user_homedir ] ; then
+  echo "$self: invalid user '$username'" >&2
+  exit 2
+fi
+
+if [ ! -d $user_homedir/Maildir/.learn-spam/cur ] ; then
+  echo "$self: ~$username/Maildir/.learn-spam doesn't exist" >&2
+  exit 3
+fi
+if [ ! -f $user_homedir/Maildir/.learn-spam/asf_learned ] ; then
+  echo "$self: ~$username/Maildir/.learn-spam/asf_learned doesn't exist" >&2
+  exit 4
+fi
+
+echo "$(date --rfc-3339=seconds)  $username (cleanup)"
+
+# find all files in "learn-spam" that are older than the tag file and move it
+# to "spam"
+# (Uses GNU mv's --target-directory option to allow xargs to work in multi-file
+# mode.)
+find $user_homedir/Maildir/.learn-spam/cur -type f ! -newer $user_homedir/Maildir/.learn-spam/asf_learned | \
+  xargs --no-run-if-empty mv -v --target-directory=$user_homedir/Maildir/.spam/cur
+## xargs -I '{}' mv '{}' $user_homedir/Maildir/.spam/cur
+
+echo
