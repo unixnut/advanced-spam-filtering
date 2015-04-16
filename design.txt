@@ -2,18 +2,24 @@ A set of tools to set up iMAP-based user training for SpamAssassin, including
 hooks for Horde's Ingo filter system.
 
 == setup ==
-ensure SpamAssassin is working
-create spam, learn-spam and learn-notspam folders for all users and /etc/skel
-if not using "mailbox_command = procmail" in /etc/postfix/main.cf, set up user forwards
+1) ensure SpamAssassin is working
+2) run "make install"
+3) alter /usr/local/etc/asf/conf.sh if necesssary
+
+These instructions are mostly redundant; use setup_asf.
+  create spam, learn-spam and learn-notspam folders for all users and /etc/skel
+  if not using "mailbox_command = procmail" in /etc/postfix/main.cf, set up
+  user forwards
 
 == per-user preparation ==
-install .procmailrc if necessary
-check homedir permissions
-run "setup_asf fred"
-move any user-saved misclassified mail to appropriate folders
-in MUA, subscribe to spam, learn-spam and learn-notspam folders
-check inbox for spam
-learn ham in inbox
+1) install .procmailrc if necessary
+2) check homedir permissions
+3) run "setup_asf fred"
+4) move any user-saved misclassified mail to appropriate folders
+5) in MUA, subscribe to spam, learn-spam and learn-notspam folders
+   (replace with folder names specified in /usr/local/etc/asf/conf.sh as necessary)
+6) check inbox for spam
+7) learn ham in inbox
 
 == auto-Learning folders ==
 cron job runs hourly to check if anything present

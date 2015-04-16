@@ -7,7 +7,7 @@
 # Note: this script must be run as the user given as <username>
 # The cron job that calls this script should redirect stdout to a WRITABLE log file
 #
-# Version: 1.1
+# Version: 1.2
 
 self=${0##*/}
 syslog_facility=mail
@@ -57,32 +57,32 @@ if [ ! -d $user_homedir ] ; then
   exit 2
 fi
 
-if [ ! -d $user_homedir/Maildir/.learn-spam/cur ] ; then
-  echo "$self: ~$username/Maildir/.learn-spam doesn't exist" >&2
+if [ ! -d $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur ] ; then
+  echo "$self: ~$username/Maildir/.$LEARN_SPAM_FOLDER doesn't exist" >&2
   exit 3
 fi
 
-if [ ! -d $user_homedir/Maildir/.learn-notspam/cur ] ; then
-  echo "$self: ~$username/Maildir/.learn-notspam doesn't exist" >&2
+if [ ! -d $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur ] ; then
+  echo "$self: ~$username/Maildir/.$LEARN_NOTSPAM_FOLDER doesn't exist" >&2
   exit 3
 fi
 
 echo "$(date --rfc-3339=seconds)  $username"
 
-if ! dir_empty $user_homedir/Maildir/.learn-spam/cur
+if ! dir_empty $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur
 then
-  touch $user_homedir/Maildir/.learn-spam/asf_learned
+  touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
   log debug "spam for $username... learning"
-  sa-learn --no-sync --spam $user_homedir/Maildir/.learn-spam/cur
+  sa-learn --no-sync --spam $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur
   sync=y
 fi
-if ! dir_empty $user_homedir/Maildir/.learn-notspam/cur
+if ! dir_empty $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur
 then
   log debug "ham for $username... learning"
-  sa-learn --no-sync --ham $user_homedir/Maildir/.learn-notspam/cur
+  sa-learn --no-sync --ham $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur
   sync=y
   log debug "ham for $username... moving to inbox"
-  mv $user_homedir/Maildir/.learn-notspam/cur/* $user_homedir/Maildir/cur
+  mv $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur/* $user_homedir/Maildir/cur
 fi
 
 if [ "$sync" = y ] ; then

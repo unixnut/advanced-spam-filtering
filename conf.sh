@@ -1,0 +1,3 @@
+SPAM_FOLDER=spam
+LEARN_SPAM_FOLDER=learn-spam
+LEARN_NOTSPAM_FOLDER=learn-notspam

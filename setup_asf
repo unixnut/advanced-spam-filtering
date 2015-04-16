@@ -1,7 +1,13 @@
 #! /bin/sh
 # setup_asf (Bourne shell script) -- sets up advanced spam filtering for a given user
+#
+# Version: 1.2
 
 self=${0##*/}
+
+set -e
+
+. /usr/local/etc/asf/conf.sh
 
 if [ -n "$1" ] ; then
   username=$1
@@ -27,12 +33,21 @@ then
   exit 3
 fi
 
-maildirmake.dovecot $user_homedir/Maildir/.spam $username
-maildirmake.dovecot $user_homedir/Maildir/.learn-spam $username
-maildirmake.dovecot $user_homedir/Maildir/.learn-notspam $username
+maildirmake.dovecot $user_homedir/Maildir/.$SPAM_FOLDER $username
+maildirmake.dovecot $user_homedir/Maildir/.$LEARN_SPAM_FOLDER $username
+maildirmake.dovecot $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER $username
 
-# this is used as a time boundary so asf_cleanup doesn't move spam that hasn't been learned yet
-touch $user_homedir/Maildir/.learn-spam/asf_learned
+# this is used as a time boundary so asf_cleanup doesn't move spam that hasn't
+# been learned yet
+touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
 
-# TO-DO: check for "mailbox_command = procmail ..." in /etc/postfix/main.cf
-echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward
+# check for "mailbox_command = procmail ..." in /etc/postfix/main.cf
+if grep -q '^[[:space:]]*mailbox_command[[:space:]]*=[[:space:]]*[-a-z/]*procmail' /etc/postfix/main.cf
+then
+  echo "$self: Notice: /etc/postfix/main.cf already invokes procmail"
+else
+  echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward
+fi
+
+echo
+echo "Don't forget to create/update .procmailrc, replacing '.spam' with '.$SPAM_FOLDER'"
