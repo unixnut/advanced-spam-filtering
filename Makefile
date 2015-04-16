@@ -1,4 +1,4 @@
-DEST=/
+DEST=
 PREFIX=$(DEST)/usr/local
 ETC_DIR=$(PREFIX)/etc
 

@@ -27,12 +27,6 @@ if [ ! -d $user_homedir/Maildir ] ; then
   exit 2
 fi
 
-if grep -q '^[^#]*procmail' $user_homedir/.forward 2>/dev/null
-then
-  echo "$self: ~$username/.forward already invokes procmail" >&2
-  exit 3
-fi
-
 maildirmake.dovecot $user_homedir/Maildir/.$SPAM_FOLDER $username
 maildirmake.dovecot $user_homedir/Maildir/.$LEARN_SPAM_FOLDER $username
 maildirmake.dovecot $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER $username
@@ -46,7 +40,12 @@ if grep -q '^[[:space:]]*mailbox_command[[:space:]]*=[[:space:]]*[-a-z/]*procmai
 then
   echo "$self: Notice: /etc/postfix/main.cf already invokes procmail"
 else
-  echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward
+  if grep -q '^[^#]*procmail' $user_homedir/.forward 2>/dev/null
+  then
+    echo "$self: Notice: ~$username/.forward already invokes procmail" >&2
+  else
+    echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward
+  fi
 fi
 
 echo
