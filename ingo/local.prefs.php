@@ -10,7 +10,7 @@ $_prefs['rules'] = array(
 
 // Spam rule.
 $_prefs['spam'] = array(
-    'value' => 'a:2:{s:6:"folder";s:4:"spam";s:5:"level";i:5;}',
+    'value' => 'a:2:{s:6:"folder";s:4:"spam";s:5:"level";i:7;}',
     // Lock this preference to disable the spam rule.
     'locked' => false,
     'type' => 'implicit'
