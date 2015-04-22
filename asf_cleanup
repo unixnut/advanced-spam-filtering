@@ -67,7 +67,8 @@ echo "$(date --rfc-3339=seconds)  $username (cleanup)"
 # move it to "spam"
 # (Uses GNU mv's --target-directory option to allow xargs to work in multi-file
 # mode.)
-find $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur -type f ! -newer $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned |
+find $user_homedir/Maildir/.$LEARN_SPAM_FOLDER -type f \
+     ! -newer $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned |
   xargs --no-run-if-empty mv -v --target-directory=$user_homedir/Maildir/.$SPAM_FOLDER/cur
 ## xargs -I '{}' mv '{}' $user_homedir/Maildir/.spam/cur
 

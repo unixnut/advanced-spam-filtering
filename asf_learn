@@ -72,21 +72,28 @@ fi
 
 echo "$(date --rfc-3339=seconds)  $username"
 
-if ! dir_empty $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur
-then
-  touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
-  log debug "spam for $username... learning"
-  sa-learn --no-sync --spam $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/cur
-  sync=y
-fi
-if ! dir_empty $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur
-then
-  log debug "ham for $username... learning"
-  sa-learn --no-sync --ham $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur
-  sync=y
-  log debug "ham for $username... moving to inbox"
-  mv $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/cur/* $user_homedir/Maildir/cur
-fi
+# Check the user's training folders.  The user might or might not have
+# viewed them since moving a message there, so check both the "new" and
+# "cur" subdirectory for each.
+for subdir in new cur ; do
+  if ! dir_empty $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/$subdir
+  then
+    touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
+    log debug "spam for $username... learning"
+    sa-learn --no-sync --spam $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/$subdir
+    sync=y
+  fi
+done
+for subdir in new cur ; do
+  if ! dir_empty $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir
+  then
+    log debug "ham for $username... learning"
+    sa-learn --no-sync --ham $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir
+    sync=y
+    log debug "ham for $username... moving to inbox"
+    mv $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir/* $user_homedir/Maildir/cur
+  fi
+done
 
 if [ "$sync" = y ] ; then
   log debug "syncing for $username"
