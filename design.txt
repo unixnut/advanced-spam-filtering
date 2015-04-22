@@ -11,6 +11,10 @@ These instructions are mostly redundant; use setup_asf.
   if not using "mailbox_command = procmail" in /etc/postfix/main.cf, set up
   user forwards
 
+-- upgrade notes --
+If already using Ingo, this SQL will be needed to remove incorrect rule order:
+  delete from ingo_rules where rule_owner != "alastair";
+
 == per-user preparation ==
 1) install .procmailrc if necessary
 2) check homedir permissions

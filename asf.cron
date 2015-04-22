@@ -1,6 +1,5 @@
 USERS=alastair lewis
 
-# m h  dom mon dow   user	command
- 0  *    *   *   *   root	for user in $USERS ; do sudo -u $user /usr/local/sbin/asf_learn $user ; done >> /var/log/local/asf.log
-30  *    *   *   *   root	for user in $USERS ; do sudo -u $user /usr/local/sbin/asf_cleanup $user ; done >> /var/log/local/asf.log
-
+# m   h  dom mon dow   user	command
+*/5   *    *   *   *   root	for user in $USERS ; do sudo -u $user /usr/local/sbin/asf_learn $user ; done >> /var/log/local/asf.log
+30    *    *   *   *   root	for user in $USERS ; do sudo -u $user /usr/local/sbin/asf_cleanup $user ; done >> /var/log/local/asf.log
