@@ -14,6 +14,10 @@ self=${0##*/}
 syslog_facility=mail
 syslog_tag="$self[$$]"
 
+. /usr/local/etc/asf/conf.sh
+
+# *** Functions ***
+
 
 # *** MAINLINE ***
 # check for -d (the debug switch)

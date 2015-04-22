@@ -1,0 +1,12 @@
+# This mimics the master.cf "dovecot" transport recommended by 
+# http://wiki2.dovecot.org/LDA/Postfix:
+#   dovecot   unix  -       n       n       -       -       pipe flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/dovecot-lda -f ${sender} -a ${recipient} -d ${user}@${nexthop}
+#
+# Unlike the above, this runs the command as the real user whose mail is being
+# delivered.
+#
+# Alternatives:
+#   + http://wiki2.dovecot.org/LMTP 
+#   + http://wiki2.dovecot.org/LDA#multipleuids 
+
+mailbox_command = /usr/lib/dovecot/dovecot-lda -f "$SENDER" -a "$ORIGINAL_RECIPIENT" -d "$USER"

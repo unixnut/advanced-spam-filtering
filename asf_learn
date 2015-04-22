@@ -13,7 +13,10 @@ self=${0##*/}
 syslog_facility=mail
 syslog_tag="$self[$$]"
 
+. /usr/local/etc/asf/conf.sh
 
+
+# *** Functions ***
 dir_empty()
 {
   if [ "$(ls -A $1)" ]; then
