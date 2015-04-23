@@ -2,10 +2,14 @@ DEST=
 PREFIX=$(DEST)/usr/local
 ETC_DIR=$(PREFIX)/etc
 REAL_ETC_DIR=$(DEST)/etc
+INGO_CONF_DIR=$(REAL_ETC_DIR)/horde/ingo
 
-.PHONY: install install_sa
+.PHONY: all install install_sa
+all: install install_sa
+
 install: $(ETC_DIR)/asf/conf.sh $(DEST)/var/log/local \
   $(PREFIX)/sbin/asf_learn $(PREFIX)/sbin/asf_cleanup \
+  $(INGO_CONF_DIR)/backends.d/sieve.php $(INGO_CONF_DIR)/prefs.d/local.php \
   $(REAL_ETC_DIR)/cron.d/local_asf
 
 # --compare and --preserve-timestamps are mutually exclusive
@@ -16,10 +20,10 @@ $(ETC_DIR)/asf/conf.sh: conf.sh | $(ETC_DIR)/asf
 $(ETC_DIR)/asf $(DEST)/var/log/local:
 	mkdir -p $@
 
-$(REAL_ETC_DIR)/horde/ingo/backends.d/sieve.php: ingo/sieve.backend.php
+$(INGO_CONF_DIR)/backends.d/sieve.php: ingo/sieve.backend.php
 	install --backup -m 644 $^ $@
 
-$(REAL_ETC_DIR)/horde/ingo/prefs.d/local.php: ingo/local.prefs.php
+$(INGO_CONF_DIR)/prefs.d/local.php: ingo/local.prefs.php
 	install --compare --backup -m 644 $^ $@
 	@echo "Don't forget to change 'level' and 'folder' settings in $@"
 	@echo "(see \$_prefs['spam'])"
@@ -42,3 +46,5 @@ $(REAL_ETC_DIR)/cron.d/local_asf: asf.cron
 install_sa:
 	apt-get -o 'Apt::Install-Recommends: no' install spamass-milter spamassassin
 	@echo "Don't forget to update /etc/postfix/main.cf as per postfix/main.cf.snippet"
+	@echo "And don't forget to edit /etc/spamassassin/local.cf, then"
+	@echo "run \"sudo service spamassassin reload\""
