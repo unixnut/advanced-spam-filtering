@@ -72,13 +72,16 @@ fi
 
 echo "$(date --rfc-3339=seconds)  $username"
 
+# Provide a stamp so that only files older than it are learned by
+# asf_cleanup
+touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
+
 # Check the user's training folders.  The user might or might not have
 # viewed them since moving a message there, so check both the "new" and
 # "cur" subdirectory for each.
 for subdir in new cur ; do
   if ! dir_empty $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/$subdir
   then
-    touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
     log debug "spam for $username... learning"
     sa-learn --no-sync --spam $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/$subdir
     sync=y

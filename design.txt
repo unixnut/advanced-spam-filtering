@@ -8,7 +8,7 @@ hooks for Horde's Ingo filter system.
 
 These instructions are mostly redundant; use setup_asf.
   create spam, learn-spam and learn-notspam folders for all users and /etc/skel
-  if not using "mailbox_command = procmail" in /etc/postfix/main.cf, set up
+  if not using "mailbox_command = ..." in /etc/postfix/main.cf, set up
   user forwards
 
 -- upgrade notes --
@@ -16,7 +16,7 @@ If already using Ingo, this SQL will be needed to remove incorrect rule order:
   delete from ingo_rules where rule_owner != "alastair";
 
 == per-user preparation ==
-1) install .procmailrc if necessary
+1) remove pre-existing .forward and .procmailrc
 2) check homedir permissions
 3) run "setup_asf fred"
 4) move any user-saved misclassified mail to appropriate folders
@@ -24,9 +24,10 @@ If already using Ingo, this SQL will be needed to remove incorrect rule order:
    (replace with folder names specified in /usr/local/etc/asf/conf.sh as necessary)
 6) check inbox for spam
 7) learn ham in inbox
+8) in Ingo, alter spam setting or deliberately generate script
 
 == auto-Learning folders ==
-cron job runs hourly to check if anything present
+cron job runs every 5 minutes to check if anything present
   learn spam in "learn-spam" (cur only)
   learn ham in "learn-notspam" (cur only) then move to inbox
   

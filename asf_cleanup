@@ -1,6 +1,9 @@
 #! /bin/sh
 # asf_cleanup (Bourne shell script) -- Advanced Spam Filtering's post-learning cleanup script
-# Moves a given user's learned spam to their "spam" folder
+#
+# Moves a given user's learned spam to their "spam" folder.  This is done as a
+# separate action (contrast with the move-after-learn done for false positives by
+# asf_learn) to give the user some time to go looking for it if they moved it by mistake.
 #
 # Usage: asf_cleanup [-d] <username>
 #
@@ -63,8 +66,8 @@ fi
 
 echo "$(date --rfc-3339=seconds)  $username (cleanup)"
 
-# find all files in "learn-spam" folder that are older than the tag file and
-# move it to "spam"
+# Find all files in "learn-spam" folder that are older than the tag file and
+# move it to "spam" (avoids moving anything that hasn't been learned yet)
 # (Uses GNU mv's --target-directory option to allow xargs to work in multi-file
 # mode.)
 find $user_homedir/Maildir/.$LEARN_SPAM_FOLDER -type f \
