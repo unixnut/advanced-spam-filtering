@@ -19,7 +19,7 @@ syslog_tag="$self[$$]"
 # *** Functions ***
 dir_empty()
 {
-  if [ "$(ls -A $1)" ]; then
+  if [ "$(ls -A "$1")" ]; then
     return 1
   else
     return 0
