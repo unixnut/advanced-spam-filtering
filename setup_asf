@@ -27,26 +27,14 @@ if [ ! -d $user_homedir/Maildir ] ; then
   exit 2
 fi
 
-maildirmake.dovecot $user_homedir/Maildir/.$SPAM_FOLDER $username
-maildirmake.dovecot $user_homedir/Maildir/.$LEARN_SPAM_FOLDER $username
-maildirmake.dovecot $user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER $username
+for folder in "$SPAM_FOLDER" "$LEARN_SPAM_FOLDER" "$LEARN_NOTSPAM_FOLDER" ; do
+  if [ -d "$user_homedir/Maildir/.$folder" ] ; then
+    echo "$self: Notice: '"$user_homedir/Maildir/.$folder"' already exists"
+  else
+    maildirmake.dovecot "$user_homedir/Maildir/.$folder" $username
+  fi
+done
 
 # this is used as a time boundary so asf_cleanup doesn't move spam that hasn't
 # been learned yet
-touch $user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned
-
-# check for "mailbox_command = procmail ..." in /etc/postfix/main.cf
-if grep -q '^[[:space:]]*mailbox_command[[:space:]]*=[[:space:]]*[-a-z/]*procmail' /etc/postfix/main.cf
-then
-  echo "$self: Notice: /etc/postfix/main.cf already invokes procmail"
-else
-  if grep -q '^[^#]*procmail' $user_homedir/.forward 2>/dev/null
-  then
-    echo "$self: Notice: ~$username/.forward already invokes procmail" >&2
-  else
-    echo '"|exec /usr/bin/procmail"'>> $user_homedir/.forward
-  fi
-fi
-
-echo
-echo "Don't forget to create/update .procmailrc, replacing '.spam' with '.$SPAM_FOLDER'"
+sudo install -o $username /dev/null "$user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned"
