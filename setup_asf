@@ -12,19 +12,19 @@ set -e
 if [ -n "$1" ] ; then
   username=$1
 else
-  echo "$self: no username supplied" >&2
+  echo "$self: Error: no username supplied" >&2
   exit 1
 fi
 
 user_homedir=$(getent passwd $username | cut -d: -f6) 
 if [ ! -d $user_homedir ] ; then
-  echo "$self: invalid user" >&2
+  echo "$self: Error: invalid user" >&2
   exit 2
 fi
 
 if [ ! -d $user_homedir/Maildir ] ; then
-  echo "$self: ~$username/Maildir doesn't exist" >&2
-  exit 2
+  echo "$self: Error: ~$username/Maildir doesn't exist" >&2
+  exit 3
 fi
 
 for folder in "$SPAM_FOLDER" "$LEARN_SPAM_FOLDER" "$LEARN_NOTSPAM_FOLDER" ; do
@@ -38,3 +38,18 @@ done
 # this is used as a time boundary so asf_cleanup doesn't move spam that hasn't
 # been learned yet
 sudo install -o $username /dev/null "$user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned"
+
+# Modify the global cron job
+if [ ! -f /etc/cron.d/local_asf ] ; then
+  echo "$self: Error: /etc/cron.d/local_asf does not exist" >&2
+  exit 4
+fi
+
+if ! grep -q "^USERS.*\<$username\>" /etc/cron.d/local_asf
+then
+  cp -p /etc/cron.d/local_asf /etc/cron.d/local_asf.bak
+  sed -i "/^USERS/ s/\"\$/ $username\"/" /etc/cron.d/local_asf
+  echo "$self: Success: '"$username"' added to user list in /etc/cron.d/local_asf"
+else
+  echo "$self: Notice: '"$username"' already in user list in /etc/cron.d/local_asf"
+fi
