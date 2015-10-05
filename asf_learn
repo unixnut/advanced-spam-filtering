@@ -82,7 +82,7 @@ then
   sa-learn --no-sync --ham $user_homedir/Maildir/.learn-notspam/cur
   sync=y
   log debug "ham for $username... moving to inbox"
-  mv $user_homedir/Maildir/.learn-notspam/cur/* $user_homedir/Maildir/cur
+  mv -v $user_homedir/Maildir/.learn-notspam/cur/* $user_homedir/Maildir/cur
 fi
 
 if [ "$sync" = y ] ; then
