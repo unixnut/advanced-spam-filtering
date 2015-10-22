@@ -74,7 +74,7 @@ find "$user_homedir/Maildir/.$LEARN_SPAM_FOLDER"/cur "$user_homedir/Maildir/.$LE
      ! -newer "$user_homedir/Maildir/.$LEARN_SPAM_FOLDER/asf_learned" \
      -print0 |
   xargs --no-run-if-empty -0 \
-    mv $MV_OPTS --target-directory="$user_homedir/Maildir/.$SPAM_FOLDER/cur"
+    mv $MV_OPTS --target-directory="$user_homedir/Maildir/.$SPAM_FOLDER/new"
 ## xargs -I '{}' mv '{}' $user_homedir/Maildir/.spam/cur
 
 echo

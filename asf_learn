@@ -94,7 +94,7 @@ for subdir in new cur ; do
     sa-learn --no-sync --ham "$user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir"
     sync=y
     log debug "ham for $username... moving to inbox"
-    mv $MV_OPTS "$user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir"/* $user_homedir/Maildir/cur
+    mv $MV_OPTS "$user_homedir/Maildir/.$LEARN_NOTSPAM_FOLDER/$subdir"/* $user_homedir/Maildir/new
   fi
 done
 
